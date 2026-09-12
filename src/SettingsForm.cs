@@ -198,6 +198,11 @@ namespace TokenMeter
         private const string Name = "Claudometer";
         private const string Legacy = "TokenMeter";
 
+        private static string Command
+        {
+            get { return "\"" + Application.ExecutablePath + "\""; }
+        }
+
         public static bool IsEnabled()
         {
             try
@@ -208,6 +213,30 @@ namespace TokenMeter
             catch (Exception) { return false; }
         }
 
+        /// <summary>
+        /// Repair the Run entry at startup. The value is a literal path, so renaming or moving the
+        /// exe (or the pre-Claudometer key name) leaves it pointing at something that no longer
+        /// exists - Windows then fails silently at boot while the checkbox still reads "on". Point
+        /// it at wherever this exe actually is, and retire the legacy name.
+        /// </summary>
+        public static void Sync()
+        {
+            try
+            {
+                using (var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(Key, true))
+                {
+                    if (k == null) return;
+                    bool wanted = k.GetValue(Name) != null || k.GetValue(Legacy) != null;
+                    if (k.GetValue(Legacy) != null) k.DeleteValue(Legacy, false);
+                    if (!wanted) return;
+                    string cur = k.GetValue(Name) as string;
+                    if (!string.Equals(cur, Command, StringComparison.OrdinalIgnoreCase))
+                        k.SetValue(Name, Command);
+                }
+            }
+            catch (Exception) { }
+        }
+
         public static void Set(bool on)
         {
             using (var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(Key, true))
@@ -215,7 +244,7 @@ namespace TokenMeter
                 if (k == null) return;
                 if (k.GetValue(Legacy) != null) k.DeleteValue(Legacy, false);   // drop the pre-rename key
                 if (on)
-                    k.SetValue(Name, "\"" + Application.ExecutablePath + "\"");
+                    k.SetValue(Name, Command);
                 else if (k.GetValue(Name) != null)
                     k.DeleteValue(Name, false);
             }

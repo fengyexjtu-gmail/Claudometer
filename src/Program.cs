@@ -102,6 +102,7 @@ namespace TokenMeter
             _backoffSec = _cfg.PollSeconds;
             _history.Load();
             Updater.CleanupOld();   // remove the previous exe left by a past self-update
+            Autostart.Sync();       // repoint a stale Run entry (rename/move) at the current exe
 
             BuildTray();
             _panel.RefreshRequested += delegate { PollNow(); };
