@@ -15,6 +15,30 @@ keep open — it just lives in your tray and turns amber, then red, before you r
 
 *(Named for the `-ometer` instrument family — speed·o·meter, therm·o·meter — Claud·o·meter.)*
 
+> **This is a fork** of [micusic/Claudometer](https://github.com/micusic/Claudometer). It adds a
+> pinnable always-on-top panel with a one-line mini bar, a Windows 11 glass background, a forecast
+> spelled out in words with early warnings, and a simpler time-zone picker — see
+> [What's new in 1.3](#whats-new-in-13). It self-updates from **this** repo's releases.
+
+## What's new in 1.3
+
+| Full panel | Mini bar (pinned) |
+|---|---|
+| ![Panel with the forecast line and the 7-day pace tick](docs/panel-1.3.png) | ![One-line mini bar](docs/mini-1.3.png)<br><br>![Glass background over a busy window](docs/glass-1.3.png) |
+
+- **The forecast in words** — *"At this pace: limit ~11:19, 20m before reset"* or *"~83% by
+  reset"*, right under the 5-hour gauge and in the tray tooltip
+- **Early warning** — on course to run out before the reset, the number turns amber and the tray
+  icon gets a rim while you're still under the warn threshold, plus one balloon per window
+- **Steadier forecast** — the rate blends the last 45 minutes with the window average
+- **7-day pace tick** — where an even week would put you by now
+- **📌 Pin / drag** — the panel stays on top at a remembered spot; **–** collapses it to a mini bar
+- **Glass** — Windows 11 acrylic background (Settings → Glass background)
+- **Tidier panel** — sized to its content, no empty rows, the `now` label no longer sits on the
+  100% line
+- **Time zone** — follows Windows by default; a short list of common zones by their localized
+  names, *More time zones…* for the rest
+
 ## Download
 
 Grab **`Claudometer.exe`** from the [latest release](../../releases/latest) and run it — that's it.
@@ -43,8 +67,10 @@ automatically (toggle in Settings, or **Check for updates…** in the menu).
 
 ### macOS (beta)
 
-A native menu-bar port lives on the [`mac`](../../tree/mac) branch. Download **`Claudometer-mac.zip`**
-from the [latest macOS release](../../releases) (asset on *Claudometer for macOS*), unzip
+A native menu-bar port lives on the upstream repo's
+[`mac`](https://github.com/micusic/Claudometer/tree/mac) branch (it doesn't have the 1.3 changes).
+Download **`Claudometer-mac.zip`** from the
+[upstream releases](https://github.com/micusic/Claudometer/releases) (asset on *Claudometer for macOS*), unzip
 `Claudometer.app`, and drag it to Applications. It's unsigned, so the first launch is **right-click →
 Open**. It sits in the menu bar (not the Dock); click it → **Show panel**, then sign in.
 
