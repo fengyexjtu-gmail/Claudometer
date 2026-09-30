@@ -8,3 +8,8 @@ attic/
 *.tmp
 *.bak
 *.png.icons.png
+
+# macOS build output (swift build / the assembled app)
+mac/.build/
+mac/Claudometer.app/
+mac/Claudometer-mac.zip

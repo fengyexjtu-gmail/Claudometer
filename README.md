@@ -67,15 +67,16 @@ automatically (toggle in Settings, or **Check for updates…** in the menu).
 
 ### macOS (beta)
 
-A native menu-bar port lives on the upstream repo's
-[`mac`](https://github.com/micusic/Claudometer/tree/mac) branch (it doesn't have the 1.3 changes).
-Download **`Claudometer-mac.zip`** from the
-[upstream releases](https://github.com/micusic/Claudometer/releases) (asset on *Claudometer for macOS*), unzip
-`Claudometer.app`, and drag it to Applications. It's unsigned, so the first launch is **right-click →
-Open**. It sits in the menu bar (not the Dock); click it → **Show panel**, then sign in.
+A native Swift/AppKit menu-bar port lives in [`mac/`](mac). CI builds it on every change
+([Actions → mac](../../actions/workflows/mac.yml) → artifact **Claudometer-mac**), and from the next
+release on, **`Claudometer-mac.zip`** is attached to each release next to the Windows exe. Unzip
+`Claudometer.app` and drag it to Applications. It's ad-hoc signed, not notarized, so the first launch
+is **right-click → Open**. It sits in the menu bar (not the Dock); click it → **Show panel**, then
+sign in.
 
-Same API-only design and burn-up chart as the Windows build. Still beta: English-only, no settings
-window or self-update yet. Requires macOS 12+.
+Same API-only design and burn-up chart as the Windows build, ported from upstream as of 1.2.0 — it
+doesn't have the 1.3 additions yet. Still beta: English-only, no settings window or self-update.
+Requires macOS 12+. To build locally: `cd mac && swift build -c release`.
 
 ---
 
