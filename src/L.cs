@@ -83,20 +83,23 @@ namespace TokenMeter
             Add("pill.ago", "official · {0} ago", "官方 · {0}前", "officiel · il y a {0}", "офиц. · {0} назад", "公式 · {0}前");
             Add("pill.stale", "official · {0} ago (refreshing)", "官方 · {0}前（刷新中）", "officiel · il y a {0} (actualisation)", "офиц. · {0} назад (обновление)", "公式 · {0}前（更新中）");
 
-            Add("chart.title", "Burn-up — this window", "本窗口燃起图", "Burn-up — cette fenêtre", "Burn-up — это окно", "バーンアップ（この期間）");
+            Add("chart.title", "Burn-up — this window", "本窗口用量走势", "Burn-up — cette fenêtre", "Burn-up — это окно", "バーンアップ（この期間）");
             Add("legend.actual", "actual", "实际", "réel", "факт", "実績");
             Add("legend.forecast", "forecast", "预测", "prévision", "прогноз", "予測");
             Add("legend.pace", "pace", "匀速", "rythme", "темп", "ペース");
             Add("legend.ceiling", "limit 100%", "上限 100%", "limite 100 %", "предел 100%", "上限 100%");
-            Add("chart.samples", "{0} data points", "{0} 个采样点", "{0} points", "{0} точек", "{0} 個のサンプル");
+            Add("fc.hit", "At this pace: limit ~{0}, {1} before reset", "按当前速度约 {0} 触顶 · 比重置早 {1}", "À ce rythme : limite vers {0}, {1} avant la réinit.", "При таком темпе: лимит ~{0}, за {1} до сброса", "このペースだと {0} 頃に上限 · リセットの {1} 前");
+            Add("fc.ok", "At this pace: ~{0}% by reset", "按当前速度重置时约用到 {0}%", "À ce rythme : ~{0} % à la réinit.", "При таком темпе: ~{0}% к сбросу", "このペースだとリセット時に約 {0}%");
+            Add("fc.hit.short", "limit ~{0} · {1} early", "约 {0} 触顶 · 早 {1}", "limite ~{0} · {1} d'avance", "лимит ~{0} · на {1} раньше", "{0} 頃上限 · {1} 早い");
+            Add("fc.ok.short", "~{0}% by reset", "重置时约 {0}%", "~{0} % à la réinit.", "~{0}% к сбросу", "リセット時 約 {0}%");
+            Add("win5.short", "5h", "5 小时", "5 h", "5 ч", "5 時間");
+            Add("win7.short", "7d", "7 天", "7 j", "7 дн", "7 日");
+            Add("win7.pace", "even pace {0}%", "匀速应为 {0}%", "rythme régulier {0} %", "ровный темп {0}%", "均等ペース {0}%");
             Add("chart.now", "now", "现在", "maintenant", "сейчас", "現在");
 
             Add("win7.title", "7-day window", "7 天窗口", "Fenêtre de 7 j", "7-дневное окно", "7 日間ウィンドウ");
             Add("models.title", "7-day · by model", "7 天 · 分模型", "7 j · par modèle", "7 дней · по модели", "7 日間 · モデル別");
-            Add("models.none", "7-day by model: not in this reading", "7 天分模型：本次读数未返回", "7 j par modèle : absent de cette lecture", "7 дней по модели: нет в этом ответе", "7 日間モデル別：今回は返されませんでした");
 
-            Add("footer.read", "official API · read {0}", "官方接口 · {0} 读取", "API officielle · lu {0}", "офиц. API · считано {0}", "公式 API · {0} 取得");
-            Add("footer.history", "{0} local records", "{0} 条本地历史", "{0} enreg. locaux", "{0} локальных записей", "ローカル履歴 {0} 件");
 
             // ---- tray / menu ----
             Add("menu.panel", "Show panel", "显示面板", "Afficher le panneau", "Показать панель", "パネルを表示");
@@ -123,6 +126,8 @@ namespace TokenMeter
             Add("balloon.signedout.title", "Signed out", "已退出登录", "Déconnecté", "Выход выполнен", "ログアウトしました");
             Add("balloon.signedout.body", "Sign in to show usage.", "登录后才能显示用量。", "Connectez-vous pour afficher l'usage.", "Войдите, чтобы видеть использование.", "ログインすると使用量を表示します。");
             Add("balloon.full.title", "5-hour limit reached", "5 小时额度已用满", "Limite de 5 h atteinte", "5-часовой лимит исчерпан", "5 時間の上限に達しました");
+            Add("balloon.forecast.title", "5-hour limit expected ~{0}", "预计约 {0} 用满 5 小时额度", "Limite de 5 h prévue vers {0}", "5-часовой лимит ожидается ~{0}", "5 時間の上限は {0} 頃の見込み");
+            Add("balloon.forecast.body", "At the recent pace that's {0} before the reset. Ease off to make it.", "按最近的使用速度，会比重置早 {0}。放慢一点就能撑到重置。", "Au rythme récent, {0} avant la réinit. Ralentissez pour tenir.", "При текущем темпе это за {0} до сброса. Сбавьте темп, чтобы дотянуть.", "最近のペースだとリセットの {0} 前です。ペースを落とせば持ちます。");
             Add("balloon.reset.body", "Resets in {0}.", "{0}后重置。", "Réinit. dans {0}.", "Сброс через {0}.", "{0}後にリセットされます。");
             Add("balloon.used.title", "5-hour window at {0}%", "5 小时窗口已用 {0}%", "Fenêtre de 5 h à {0} %", "5-часовое окно: {0}%", "5 時間ウィンドウ {0}%");
 
@@ -145,6 +150,8 @@ namespace TokenMeter
             Add("settings.title", "Claudometer Settings", "Claudometer 设置", "Paramètres Claudometer", "Настройки Claudometer", "Claudometer 設定");
             Add("settings.note", "Shows only data from the official usage API — sign in to Claude first.\nLocal storage keeps only the API's readings; nothing is inferred.", "只显示官方用量接口的数据，需先登录 Claude。\n本地只保存接口返回的读数，不做任何推测。", "Affiche uniquement les données de l'API officielle — connectez-vous d'abord.\nLe stockage local ne garde que les lectures de l'API ; rien n'est déduit.", "Показывает только данные официального API — сначала войдите.\nЛокально хранятся только ответы API; ничего не додумывается.", "公式 API のデータのみを表示します。まず Claude にログインしてください。\nローカルには API の応答のみを保存し、推測はしません。");
             Add("settings.tz", "Display timezone", "显示时区", "Fuseau horaire", "Часовой пояс", "表示タイムゾーン");
+            Add("settings.tz.local", "Follow system ({0})", "跟随系统（{0}）", "Suivre le système ({0})", "Как в системе ({0})", "システムに合わせる（{0}）");
+            Add("settings.tz.more", "More time zones…", "更多时区…", "Plus de fuseaux horaires…", "Другие часовые пояса…", "その他のタイムゾーン…");
             Add("settings.theme", "Theme", "主题", "Thème", "Тема", "テーマ");
             Add("settings.theme.light", "Light", "浅色", "Clair", "Светлая", "ライト");
             Add("settings.theme.dark", "Dark", "深色", "Sombre", "Тёмная", "ダーク");
@@ -153,6 +160,7 @@ namespace TokenMeter
             Add("settings.danger", "Danger threshold (%)", "危险阈值 (%)", "Seuil critique (%)", "Критический порог (%)", "危険しきい値 (%)");
             Add("settings.poll", "Poll interval (s)", "轮询间隔 (秒)", "Intervalle de sondage (s)", "Интервал опроса (с)", "取得間隔 (秒)");
             Add("settings.notify", "Threshold notifications", "启用阈值通知", "Notifications de seuil", "Уведомления о порогах", "しきい値通知");
+            Add("settings.glass", "Glass background (Windows 11)", "毛玻璃背景（Windows 11）", "Fond en verre (Windows 11)", "Стеклянный фон (Windows 11)", "すりガラス背景（Windows 11）");
             Add("settings.autostart", "Start with Windows", "开机自动启动", "Démarrer avec Windows", "Запуск с Windows", "Windows 起動時に開始");
             Add("settings.save", "Save", "保存", "Enregistrer", "Сохранить", "保存");
             Add("settings.cancel", "Cancel", "取消", "Annuler", "Отмена", "キャンセル");

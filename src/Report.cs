@@ -87,11 +87,18 @@ namespace TokenMeter
                 W("  wk Sonnet " + r.SevenDaySonnet.Utilization.ToString("0") + "%");
         }
 
-        /// <summary>`--snapshot out.png` renders the panel from local history (no live poll).</summary>
-        public static void Snapshot(string path)
+        /// <summary>
+        /// `--snapshot out.png [compact,dark,light]` renders the panel from local history (no live
+        /// poll). The optional flags override the saved config for this render only.
+        /// </summary>
+        public static void Snapshot(string path, string flags)
         {
             if (string.IsNullOrEmpty(path)) path = "panel.png";
             AppConfig cfg = AppConfig.Load();
+            string f0 = "," + (flags ?? "").ToLowerInvariant() + ",";
+            if (f0.Contains(",compact,")) { cfg.Pinned = true; cfg.Compact = true; }
+            if (f0.Contains(",dark,")) cfg.ThemeMode = "dark";
+            if (f0.Contains(",light,")) cfg.ThemeMode = "light";
             Tz.Use(cfg.TimeZoneId);
             L.Use(cfg.Language);
             Theme.Apply(cfg.ThemeMode);

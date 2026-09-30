@@ -43,6 +43,11 @@ namespace TokenMeter
         public bool HasForecast;
         public double ForecastEndMin;
         public double ForecastEndPct;
+        public bool ForecastHits;        // the forecast crosses 100% before the reset
+        public DateTime ForecastHitUtc;  // when it crosses (valid only if ForecastHits)
+
+        // Where an even pace through the 7-day window would put you right now (0..100).
+        public double SevenPacePct = double.NaN;
 
         public int SampleCount;
     }
@@ -50,6 +55,11 @@ namespace TokenMeter
     public static class Analytics
     {
         public static readonly TimeSpan Window = TimeSpan.FromHours(5);
+        public static readonly TimeSpan Week = TimeSpan.FromDays(7);
+
+        // Share of the forecast rate taken from the last ~45 minutes; the rest is the average
+        // rate since the window opened. Pure recent slope swings wildly after a single burst.
+        private const double RecentWeight = 0.65;
 
         public static Snapshot Build(History hist, bool loggedIn, string apiStatus, DateTime nowUtc)
         {
@@ -72,6 +82,8 @@ namespace TokenMeter
             s.SevenPct = latest.SevenPct;
             s.SevenResetUtc = latest.SevenResetUtc;
             s.ToWeekReset = s.SevenResetUtc > nowUtc ? s.SevenResetUtc - nowUtc : TimeSpan.Zero;
+            if (s.SevenResetUtc > nowUtc && s.ToWeekReset <= Week)
+                s.SevenPacePct = 100.0 * (1.0 - s.ToWeekReset.TotalMinutes / Week.TotalMinutes);
 
             s.OpusPct = latest.OpusPct;
             s.SonnetPct = latest.SonnetPct;
@@ -96,9 +108,11 @@ namespace TokenMeter
         }
 
         /// <summary>
-        /// Extrapolate the recent observed slope from now to the reset. Uses the last ~45 minutes
-        /// of readings for the rate; within a window usage only rises, so a negative slope (noise)
-        /// is treated as flat. The endpoint is the reset, or the 100% crossing if it comes first.
+        /// Extrapolate the observed slope from now to the reset. The rate blends the last ~45
+        /// minutes of readings with the average since the window opened (which starts at 0%), so
+        /// one burst doesn't swing the line; within a window usage only rises, so a negative
+        /// slope (noise) is treated as flat. The endpoint is the reset, or the 100% crossing if it
+        /// comes first.
         /// </summary>
         private static void BuildForecast(Snapshot s)
         {
@@ -116,7 +130,9 @@ namespace TokenMeter
             double span = nowMin - refMin;
             if (span < 8) return;   // too little history for a meaningful slope
 
-            double ratePerMin = (nowPct - refPct) / span;
+            double recent = (nowPct - refPct) / span;
+            double average = nowMin > 0 ? nowPct / nowMin : recent;
+            double ratePerMin = RecentWeight * recent + (1 - RecentWeight) * average;
             if (ratePerMin < 0) ratePerMin = 0;
 
             double toReset = Snapshot.WindowMinutes - nowMin;
@@ -130,6 +146,8 @@ namespace TokenMeter
             s.HasForecast = true;
             s.ForecastEndMin = endMin;
             s.ForecastEndPct = endPct;
+            s.ForecastHits = endPct >= 100 && endMin < Snapshot.WindowMinutes && nowPct < 100;
+            if (s.ForecastHits) s.ForecastHitUtc = s.FiveResetUtc - Window + TimeSpan.FromMinutes(endMin);
         }
     }
 }

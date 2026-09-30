@@ -15,7 +15,7 @@ namespace TokenMeter
         private readonly AppConfig _cfg;
 
         private NumericUpDown _warn, _danger, _refresh;
-        private CheckBox _notify, _autostart, _autoupdate;
+        private CheckBox _notify, _autostart, _autoupdate, _glass;
         private ComboBox _tz, _theme, _lang;
 
         public SettingsForm(AppConfig cfg)
@@ -34,7 +34,7 @@ namespace TokenMeter
             BackColor = Bg;
             ForeColor = Fg;
             Font = new Font(FontName, 9f);
-            ClientSize = new Size(470, 430);
+            ClientSize = new Size(470, 456);
 
             int y = 14;
             AddNote(L.S("settings.note"), ref y);
@@ -45,8 +45,14 @@ namespace TokenMeter
             _lang.SelectedIndex = L.IndexOf(_cfg.Language);
 
             _tz = Combo(L.S("settings.tz"), ref y);
-            foreach (TimeZoneInfo z in TimeZoneInfo.GetSystemTimeZones()) _tz.Items.Add(z.Id);
-            _tz.SelectedItem = _tz.Items.Contains(_cfg.TimeZoneId) ? _cfg.TimeZoneId : Tz.DefaultId;
+            _tz.DropDownWidth = 400;   // Windows' zone names are long: "(UTC+08:00) Beijing, Chongqing, ..."
+            FillZones(false);
+            _tz.SelectedIndexChanged += delegate
+            {
+                var it = _tz.SelectedItem as ZoneItem;
+                if (it != null && it.Id == null)
+                    BeginInvoke((MethodInvoker)delegate { FillZones(true); _tz.DroppedDown = true; });
+            };
 
             _theme = Combo(L.S("settings.theme"), ref y);
             _theme.Items.Add(L.S("settings.theme.light"));
@@ -61,6 +67,8 @@ namespace TokenMeter
             _notify = AddCheck(L.S("settings.notify"), _cfg.Notify, ref y);
             _autoupdate = AddCheck(L.S("settings.autoupdate"), _cfg.AutoUpdate, ref y);
             _autostart = AddCheck(L.S("settings.autostart"), Autostart.IsEnabled(), ref y);
+            _glass = AddCheck(L.S("settings.glass"), _cfg.Glass && Glass.Supported, ref y);
+            _glass.Enabled = Glass.Supported;   // needs the Windows 11 22H2 backdrop API
 
             y += 10;
             var ok = new Button();
@@ -85,6 +93,41 @@ namespace TokenMeter
 
             AcceptButton = ok;
             CancelButton = cancel;
+        }
+
+        /// <summary>A zone in the dropdown: shown by Windows' localized name, stored by its id.</summary>
+        private class ZoneItem
+        {
+            public string Id;     // null = the "More time zones..." entry
+            public string Text;
+            public override string ToString() { return Text; }
+        }
+
+        /// <summary>
+        /// "Follow system", then the common zones (or every zone), then "More..." while the list is
+        /// short. The saved zone is always listed so the selection never silently changes.
+        /// </summary>
+        private void FillZones(bool all)
+        {
+            var cur = _tz.SelectedItem as ZoneItem;
+            string want = cur != null && cur.Id != null ? cur.Id : _cfg.TimeZoneId;
+            if (string.IsNullOrEmpty(want)) want = Tz.DefaultId;
+
+            _tz.BeginUpdate();
+            _tz.Items.Clear();
+            _tz.Items.Add(new ZoneItem { Id = Tz.LocalId, Text = L.F("settings.tz.local", Tz.Offset(TimeZoneInfo.Local)) });
+            bool listed = want == Tz.LocalId;
+            foreach (TimeZoneInfo z in TimeZoneInfo.GetSystemTimeZones())   // already ordered by offset
+            {
+                if (!all && Array.IndexOf(Tz.CommonIds, z.Id) < 0 && z.Id != want) continue;
+                _tz.Items.Add(new ZoneItem { Id = z.Id, Text = z.DisplayName });
+                if (z.Id == want) listed = true;
+            }
+            if (!all) _tz.Items.Add(new ZoneItem { Id = null, Text = L.S("settings.tz.more") });
+            if (!listed) want = Tz.LocalId;
+            foreach (ZoneItem it in _tz.Items)
+                if (it.Id == want) { _tz.SelectedItem = it; break; }
+            _tz.EndUpdate();
         }
 
         private ComboBox Combo(string label, ref int y)
@@ -172,8 +215,10 @@ namespace TokenMeter
             _cfg.Notify = _notify.Checked;
             _cfg.AutoUpdate = _autoupdate.Checked;
             if (_lang.SelectedIndex >= 0) _cfg.Language = L.Codes[_lang.SelectedIndex];
-            if (_tz.SelectedItem != null) _cfg.TimeZoneId = _tz.SelectedItem.ToString();
+            var zone = _tz.SelectedItem as ZoneItem;
+            if (zone != null && zone.Id != null) _cfg.TimeZoneId = zone.Id;
             _cfg.ThemeMode = _theme.SelectedIndex == 1 ? "dark" : "light";
+            if (_glass.Enabled) _cfg.Glass = _glass.Checked;
             try { _cfg.Save(); }
             catch (Exception ex)
             {

@@ -9,8 +9,8 @@ namespace TokenMeter
     /// The burn-up chart: utilization across the fixed five-hour window, drawn only from real API
     /// readings. X is the whole window (start → reset); Y is percent used, 0 → 100. Two fixed
     /// references frame it - a horizontal 100% ceiling and a straight pace line from (start,0) to
-    /// (reset,100). The actual line connects the stored API polls and stops at the latest one;
-    /// there is deliberately no forward projection, because the app shows measured data only.
+    /// (reset,100). The actual line connects the stored API polls and stops at the latest one; a
+    /// dashed forecast (see Analytics.BuildForecast) continues it to the reset.
     /// </summary>
     public static class ProjectionRenderer
     {
@@ -38,9 +38,10 @@ namespace TokenMeter
 
             int leftPad = (int)(40 * scale);
             int bottomPad = (int)(15 * scale);
-            var plot = new Rectangle(area.X + leftPad, area.Y,
+            int topPad = (int)(14 * scale);   // a lane above the 100% line for the 'now' label
+            var plot = new Rectangle(area.X + leftPad, area.Y + topPad,
                                      Math.Max(10, area.Width - leftPad - (int)(4 * scale)),
-                                     Math.Max(10, area.Height - bottomPad));
+                                     Math.Max(10, area.Height - topPad - bottomPad));
             Rectangle box = plot;
             Func<double, float> X = delegate(double min)
             {
@@ -108,7 +109,7 @@ namespace TokenMeter
                 string lab = L.S("chart.now");
                 SizeF m = g.MeasureString(lab, font);
                 float lx = Math.Max(plot.X, Math.Min(tip.X - m.Width / 2f, plot.Right - m.Width));
-                using (var b = new SolidBrush(Theme.Muted)) g.DrawString(lab, font, b, lx, plot.Y - 1 * scale);
+                using (var b = new SolidBrush(Theme.Muted)) g.DrawString(lab, font, b, lx, area.Y - 1 * scale);
             }
 
             g.SmoothingMode = SmoothingMode.Default;

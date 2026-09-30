@@ -23,6 +23,11 @@ namespace TokenMeter
         public string TimeZoneId = Tz.DefaultId;
         public string ThemeMode = "light";   // "light" | "dark"
         public string Language = "en";        // en | zh | fr | ru | ja
+        public bool Pinned;               // panel stays on screen (no auto-hide), restored at start
+        public bool Compact;              // pinned panel collapsed to the one-line mini bar
+        public bool Glass;                // Windows 11 acrylic backdrop behind the panel
+        public int PanelX = int.MinValue; // last pinned position (screen px); MinValue = none yet
+        public int PanelY = int.MinValue;
 
         public static string Dir
         {
@@ -72,6 +77,11 @@ namespace TokenMeter
                 if (kv.TryGetValue("theme", out theme) && !string.IsNullOrEmpty(theme)) c.ThemeMode = Unescape(theme);
                 string lang;
                 if (kv.TryGetValue("language", out lang) && !string.IsNullOrEmpty(lang)) c.Language = Unescape(lang);
+                c.Pinned = Bool(kv, "pinned", c.Pinned);
+                c.Compact = Bool(kv, "compact", c.Compact);
+                c.Glass = Bool(kv, "glass", c.Glass);
+                c.PanelX = (int)Num(kv, "panelX", c.PanelX);
+                c.PanelY = (int)Num(kv, "panelY", c.PanelY);
             }
             catch (Exception) { /* a broken config falls back to defaults rather than blocking startup */ }
             c.Clamp();
@@ -100,7 +110,12 @@ namespace TokenMeter
             sb.AppendLine("  \"autoUpdate\": " + (AutoUpdate ? "true" : "false") + ",");
             sb.AppendLine("  \"timeZoneId\": \"" + Escape(TimeZoneId ?? Tz.DefaultId) + "\",");
             sb.AppendLine("  \"theme\": \"" + Escape(ThemeMode ?? "light") + "\",");
-            sb.AppendLine("  \"language\": \"" + Escape(Language ?? "en") + "\"");
+            sb.AppendLine("  \"language\": \"" + Escape(Language ?? "en") + "\",");
+            sb.AppendLine("  \"pinned\": " + (Pinned ? "true" : "false") + ",");
+            sb.AppendLine("  \"compact\": " + (Compact ? "true" : "false") + ",");
+            sb.AppendLine("  \"glass\": " + (Glass ? "true" : "false") + ",");
+            sb.AppendLine("  \"panelX\": " + PanelX + ",");
+            sb.AppendLine("  \"panelY\": " + PanelY);
             sb.AppendLine("}");
             string tmp = ConfigPath + ".tmp";
             File.WriteAllText(tmp, sb.ToString(), new UTF8Encoding(false));

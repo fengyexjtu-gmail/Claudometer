@@ -23,6 +23,10 @@ in to Claude (in your browser), then it lives in your tray.
 
 - **Left click** the tray icon — the panel
 - **Right click** — menu (login, refresh, settings, open data folder, quit)
+- **📌 Pin** (or drag the panel by its header) — it stays on screen instead of hiding when you
+  click away, remembers where you put it, and comes back there on the next start
+- **–** collapses a pinned panel to a one-line mini bar (5-hour %, countdown, forecast, week); **□**
+  expands it again. **✕** on a pinned panel un-pins it
 
 To start it with Windows (autostart + Start-menu shortcut + taskbar pin), clone this repo and run:
 
@@ -106,8 +110,9 @@ The centerpiece plots utilization across the fixed five-hour window:
 - **X** — the whole window, start → reset, so "now" sits where you are in it
 - **Y** — percent used, 0 → 100
 - **green solid** — the actual readings, connecting the stored API polls up to the latest one
-- **green dashed** — a forecast: the recent observed slope extended to the reset (an estimate,
-  clearly dashed; capped at 100%)
+- **green dashed** — a forecast: the observed rate extended to the reset (an estimate, clearly
+  dashed; capped at 100%). The rate blends the last ~45 minutes with the average since the window
+  opened, so one burst doesn't swing it
 - **grey line** — the pace line: a constant rate from (start, 0) to (reset, 100%), i.e. "use
   evenly and you'd hit the limit exactly at reset"
 - **red dashed** — the 100% ceiling
@@ -116,6 +121,14 @@ Below the pace line and clear of the ceiling = headroom to spare. The solid line
 from when the app was running and polling — it never fabricates the past; the dashed forecast is
 the one estimate, derived from real readings. Colour tracks the level (green / amber / red at your
 warn / danger thresholds).
+
+Under the 5-hour gauge the forecast is spelled out — *"at this pace: limit ~10:40, 1h before
+reset"* or *"~75% by reset"*. A forecast that runs out before the reset turns the number amber and
+rims the tray icon even while you're still under the warn threshold, and (once per window, after
+half an hour of readings) raises a balloon — the warning arrives while there's time to slow down.
+
+The 7-day bar carries a tick at the even-pace point: where you'd be by now if you spread the week
+evenly. Fill left of the tick means headroom.
 
 The 5-hour gauge, the 7-day gauge, and the per-model weekly rows (Opus / Sonnet, when the API
 returns them) are all the current reading; each shows its real reset countdown.
@@ -126,9 +139,10 @@ returns them) are all the current reading; each shows its real reset countdown.
 
 Available in **English** (default), 中文, Français, Русский, and 日本語 — switch in Settings; day
 names and formatting follow the language. Light theme by default, with a dark option; colour is
-centralised in `src/Theme.cs`. Times display in a configured zone (default Singapore, UTC+8),
-deliberately not the machine's local time — a usage window is reasoned about against a fixed wall
-clock.
+centralised in `src/Theme.cs`. On Windows 11 (22H2+) the panel can use an acrylic **glass**
+background (Settings → Glass background); elsewhere the option is greyed out. Times follow the system time zone by default; Settings can pin a fixed zone
+instead (a short list of common ones, or *More time zones…* for all of them) so window times don't
+move when a laptop travels.
 
 ## Settings
 
@@ -140,9 +154,12 @@ clock.
 | `pollSeconds` | 90 | How often to poll the usage API (min 60, to be gentle) |
 | `notify` | true | Threshold balloons |
 | `autoUpdate` | true | Self-update from GitHub Releases (checked on start + every 6 h) |
-| `timeZoneId` | `Singapore Standard Time` | Display zone |
+| `timeZoneId` | `local` | Display zone: `local` follows Windows, or a Windows zone id such as `China Standard Time` |
 | `theme` | `light` | `light` or `dark` |
 | `language` | `en` | `en` / `zh` / `fr` / `ru` / `ja` |
+| `glass` | false | Acrylic backdrop behind the panel (Windows 11 22H2+) |
+| `pinned` / `compact` | false / false | Panel stays on screen / is collapsed to the mini bar |
+| `panelX` / `panelY` | — | Where the pinned panel was last put |
 
 The OAuth token lives separately in `token.bin` (DPAPI-encrypted); the API readings live in
 `history.bin`. Neither is in this file.
@@ -156,6 +173,7 @@ Needs nothing but Windows. `build.ps1` calls the .NET Framework compiler already
 
 ```
 src/Theme.cs               centralised light/dark palette + drawing helpers
+src/Glass.cs               Windows 11 rounded corners + acrylic backdrop (DWM)
 src/Tz.cs                  display timezone
 src/L.cs                   localization (en / zh / fr / ru / ja)
 src/JsonPeek.cs            partial JSON reader for API responses
@@ -176,7 +194,8 @@ src/Program.cs             tray, poll loop, alerting
 ```
 
 CLI: `--login` (browser OAuth), `--api` (print the current usage and record one reading). Debug:
-`--show` opens the panel; `--snapshot out.png` renders the panel to PNG; `--snapdlg settings|login
+`--show` opens the panel; `--snapshot out.png [compact,dark,light]` renders the panel to PNG (the
+flags override the saved config for that render); `--snapdlg settings|login
 out.png` renders a dialog — how the layout gets checked without depending on which window is on top.
 
 Superseded code (transcript scanning, the output-token metric, /usage calibration) lives under

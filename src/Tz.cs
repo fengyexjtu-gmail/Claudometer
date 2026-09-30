@@ -3,13 +3,26 @@ using System;
 namespace TokenMeter
 {
     /// <summary>
-    /// Display timezone. Deliberately not the machine's local time: usage windows are reasoned
-    /// about against a fixed wall clock, and that should not move because a laptop travelled or
-    /// because the machine is set to a neighbouring zone with the same offset today.
+    /// Display timezone. Follows the machine by default; a fixed zone can be chosen instead so the
+    /// window times don't move when a laptop travels.
     /// </summary>
     public static class Tz
     {
-        public const string DefaultId = "Singapore Standard Time";
+        /// <summary>Sentinel id: use whatever zone Windows is set to.</summary>
+        public const string LocalId = "local";
+        public const string DefaultId = LocalId;
+
+        /// <summary>
+        /// The short list the settings dialog offers before "More time zones..." - one well-known
+        /// zone per major region, as Windows ids (the dialog shows Windows' localized names).
+        /// </summary>
+        public static readonly string[] CommonIds =
+        {
+            "Pacific Standard Time", "Mountain Standard Time", "Central Standard Time",
+            "Eastern Standard Time", "UTC", "GMT Standard Time", "W. Europe Standard Time",
+            "Russian Standard Time", "India Standard Time", "China Standard Time",
+            "Singapore Standard Time", "Tokyo Standard Time", "AUS Eastern Standard Time",
+        };
 
         private static TimeZoneInfo _zone;
         private static string _id;
@@ -25,12 +38,9 @@ namespace TokenMeter
             get
             {
                 if (_zone != null) return _zone;
-                try { _zone = TimeZoneInfo.FindSystemTimeZoneById(_id ?? DefaultId); }
-                catch (Exception)
-                {
-                    try { _zone = TimeZoneInfo.FindSystemTimeZoneById(DefaultId); }
-                    catch (Exception) { _zone = TimeZoneInfo.Local; }
-                }
+                if (_id == null || _id == LocalId) return _zone = TimeZoneInfo.Local;
+                try { _zone = TimeZoneInfo.FindSystemTimeZoneById(_id); }
+                catch (Exception) { _zone = TimeZoneInfo.Local; }   // a zone this machine doesn't know
                 return _zone;
             }
         }
@@ -57,14 +67,14 @@ namespace TokenMeter
             catch (Exception) { return displayTime.ToUniversalTime(); }
         }
 
-        /// <summary>Short label for the UI, e.g. "SGT (UTC+8)".</summary>
-        public static string Label()
+        /// <summary>The zone's current offset, e.g. "UTC+8" or "UTC+5:30" (DST-aware).</summary>
+        public static string Offset(TimeZoneInfo z)
         {
-            TimeSpan off = Zone.GetUtcOffset(DateTime.UtcNow);
+            TimeSpan off = z.GetUtcOffset(DateTime.UtcNow);
             string sign = off < TimeSpan.Zero ? "-" : "+";
             string hours = Math.Abs(off.Hours).ToString();
             if (off.Minutes != 0) hours += ":" + Math.Abs(off.Minutes).ToString("00");
-            return Zone.Id + " (UTC" + sign + hours + ")";
+            return "UTC" + sign + hours;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace TokenMeter
             {
                 try { SetProcessDPIAware(); } catch (Exception) { }
                 Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
-                Report.Snapshot(Arg(args, "--snapshot")); return;
+                Report.Snapshot(Arg(args, "--snapshot"), Arg2(args, "--snapshot")); return;
             }
             if (Has(args, "--snapdlg"))
             {
@@ -90,11 +90,12 @@ namespace TokenMeter
         // Alerts, re-armed when the window resets or usage falls back below the warn line.
         private DateTime _alertWindowReset = DateTime.MinValue;
         private bool _sentWarn, _sentDanger, _sentOver;
+        private bool _sentForecast;   // once per window - not re-armed by dipping below warn
 
         public TrayApp(bool showOnReady)
         {
-            _showOnReady = showOnReady;
             _cfg = AppConfig.Load();
+            _showOnReady = showOnReady || _cfg.Pinned;   // a pinned panel comes back where it was
             L.Use(_cfg.Language);
             Tz.Use(_cfg.TimeZoneId);
             Theme.Apply(_cfg.ThemeMode);
@@ -108,6 +109,7 @@ namespace TokenMeter
             _panel.RefreshRequested += delegate { PollNow(); };
             _panel.SettingsRequested += delegate { OpenSettings(); };
             _panel.LoginRequested += delegate { DoLogin(); };
+            _panel.LayoutChanged += delegate { SaveConfig(); };
             var force = _panel.Handle;
 
             _timer.Interval = 15000;   // UI tick (countdown) + poll-if-due
@@ -161,7 +163,7 @@ namespace TokenMeter
         private void TogglePanel()
         {
             if (_panel.Visible) _panel.Hide();
-            else { _panel.Update(_snap, _cfg); _panel.ShowNearTray(); }
+            else { _panel.Update(_snap, _cfg); _panel.ShowPanel(); }
         }
 
         // ---- polling -----------------------------------------------------------------
@@ -291,7 +293,7 @@ namespace TokenMeter
             {
                 double frac = double.IsNaN(_snap.FivePct) ? 0 : _snap.FivePct / 100.0;
                 Color c = IconRenderer.LevelColor(frac, _cfg.WarnPct, _cfg.DangerPct);
-                SetIcon(frac, c, _snap.FivePct >= _cfg.DangerPct * 100);
+                SetIcon(frac, c, _snap.FivePct >= _cfg.DangerPct * 100 || _snap.ForecastHits);
                 _tray.Text = Tooltip(_snap);
             }
             if (_panel.Visible) _panel.Update(_snap, _cfg);
@@ -304,6 +306,7 @@ namespace TokenMeter
             string t = "5h " + (int)Math.Round(s.FivePct) + "%";
             if (s.FiveResetUtc > s.NowUtc) t += " ↻" + Fmt.Duration(s.ToReset);
             if (!double.IsNaN(s.SevenPct)) t += Environment.NewLine + "7d " + (int)Math.Round(s.SevenPct) + "%";
+            if (s.ForecastHits) t += Environment.NewLine + PanelForm.Verdict(s, true);
             return t.Length > 62 ? t.Substring(0, 62) : t;
         }
 
@@ -320,7 +323,7 @@ namespace TokenMeter
             if (!_cfg.Notify || !s.HasData || double.IsNaN(s.FivePct)) return;
 
             if (_alertWindowReset != s.FiveResetUtc)
-            { _alertWindowReset = s.FiveResetUtc; _sentWarn = _sentDanger = _sentOver = false; }
+            { _alertWindowReset = s.FiveResetUtc; _sentWarn = _sentDanger = _sentOver = _sentForecast = false; }
             if (s.FivePct < _cfg.WarnPct * 100 * 0.85) { _sentWarn = _sentDanger = _sentOver = false; }
 
             if (!_sentOver && s.FivePct >= 100)
@@ -340,6 +343,26 @@ namespace TokenMeter
                 _tray.ShowBalloonTip(8000, L.F("balloon.used.title", (int)Math.Round(s.FivePct)),
                     L.F("balloon.reset.body", Fmt.Duration(s.ToReset)), ToolTipIcon.Warning);
             }
+            else if (!_sentForecast && ForecastWorthAWarning(s))
+            {
+                // Early warning: still under the thresholds, but on course to run out before the
+                // reset. Held back until the window has half an hour of readings, and only when the
+                // shortfall is real (15+ min), so one early burst doesn't cry wolf.
+                _sentForecast = true;
+                _tray.ShowBalloonTip(10000, L.F("balloon.forecast.title", Fmt.LocalTime(s.ForecastHitUtc)),
+                    L.F("balloon.forecast.body", Fmt.Duration(s.FiveResetUtc - s.ForecastHitUtc)), ToolTipIcon.Warning);
+            }
+        }
+
+        private static bool ForecastWorthAWarning(Snapshot s)
+        {
+            return s.ForecastHits && s.NowMinutes >= 30 &&
+                   (s.FiveResetUtc - s.ForecastHitUtc).TotalMinutes >= 15;
+        }
+
+        private void SaveConfig()
+        {
+            try { _cfg.Save(); } catch (Exception) { /* position/pin state is a nicety; never crash over it */ }
         }
 
         // ---- login / menu ------------------------------------------------------------
@@ -377,9 +400,9 @@ namespace TokenMeter
         {
             if (!_showOnReady) return;
             _showOnReady = false;
-            _panel.SuppressAutoHide = true;
+            if (!_cfg.Pinned) _panel.SuppressAutoHide = true;   // --show: keep the pop-up up for inspection
             _panel.Update(_snap, _cfg);
-            _panel.ShowNearTray();
+            _panel.ShowPanel();
         }
 
         private void OpenSettings()
@@ -394,6 +417,7 @@ namespace TokenMeter
                         L.Use(_cfg.Language);
                         Tz.Use(_cfg.TimeZoneId);
                         Theme.Apply(_cfg.ThemeMode);
+                        _panel.ApplyGlass();   // the glass toggle, or a theme change that re-tints it
                         _backoffSec = _cfg.PollSeconds;
                         RebuildMenu();
                         Rebuild(); ApplySnapshot();
