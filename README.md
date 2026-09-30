@@ -2,10 +2,10 @@
 
 > **See your Claude limit before you hit it.**
 
-[![Latest release](https://img.shields.io/github/v/release/micusic/Claudometer?color=2E6BE6&label=release)](../../releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/micusic/Claudometer/total?color=1C9A55&label=downloads)](../../releases)
-[![License: MIT](https://img.shields.io/github/license/micusic/Claudometer?color=555)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/micusic/Claudometer?style=social)](../../stargazers)
+[![Latest release](https://img.shields.io/github/v/release/fengyexjtu-gmail/Claudometer?color=2E6BE6&label=release)](../../releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/fengyexjtu-gmail/Claudometer/total?color=1C9A55&label=downloads)](../../releases)
+[![License: MIT](https://img.shields.io/github/license/fengyexjtu-gmail/Claudometer?color=555)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/fengyexjtu-gmail/Claudometer?style=social)](../../stargazers)
 
 A Windows tray app that shows your Claude usage limits — the real 5-hour and weekly numbers,
 straight from Anthropic's own usage API. One ~100 KB exe, no runtime to install, no terminal to
