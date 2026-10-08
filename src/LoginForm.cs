@@ -87,22 +87,29 @@ namespace TokenMeter
             y += 40;
 
             _status = new Label();
-            _status.SetBounds(16, y, ClientSize.Width - 32, 40);
+            _status.SetBounds(16, y, ClientSize.Width - 32, 64);
             _status.ForeColor = Muted;
             Controls.Add(_status);
         }
 
+        /// <summary>
+        /// Open the sign-in page, and also put the link on the clipboard: the shell can hand the URL
+        /// to a browser window that stays behind (Windows won't let a tray app steal focus) or one
+        /// that redirects it, and a pasteable link is the way out of both.
+        /// </summary>
         private void OpenBrowser()
         {
+            string url = OAuth.BuildAuthorizeUrl(_verifier, _state);
+            bool copied = false;
+            try { Clipboard.SetText(url); copied = true; } catch (Exception) { }
             try
             {
-                string url = OAuth.BuildAuthorizeUrl(_verifier, _state);
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-                Say(L.S("login.opened"), Muted);
+                Say(L.S(copied ? "login.opened.copied" : "login.opened"), Muted);
             }
             catch (Exception ex)
             {
-                Say(L.F("login.openfail", ex.Message), IconRenderer.Danger);
+                Say(L.F(copied ? "login.openfail.copied" : "login.openfail", ex.Message), IconRenderer.Danger);
             }
         }
 

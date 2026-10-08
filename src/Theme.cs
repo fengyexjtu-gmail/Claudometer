@@ -17,6 +17,9 @@ namespace TokenMeter
     {
         public static bool Dark { get; private set; }
 
+        /// <summary>The panel is drawn over the acrylic backdrop (see <see cref="SetGlass"/>).</summary>
+        public static bool OnGlass { get; private set; }
+
         // Surfaces
         public static Color Bg;          // panel background
         public static Color Card;        // raised areas (segmented control, pills)
@@ -57,6 +60,28 @@ namespace TokenMeter
             Dark = dark;
             if (dark) Darken();
             else Lighten();
+            if (OnGlass) GlassOverrides();
+        }
+
+        /// <summary>
+        /// Switch the hairline colours for drawing over glass. The opaque track, grid and divider
+        /// shades are near the background colour by design, so over the lighter acrylic wash they
+        /// disappear; translucent ink (dark on light, light on dark) stays visible whatever shows
+        /// through.
+        /// </summary>
+        public static void SetGlass(bool on)
+        {
+            if (on == OnGlass) return;
+            OnGlass = on;
+            SetMode(Dark);
+        }
+
+        private static void GlassOverrides()
+        {
+            int ink = Dark ? 255 : 0;
+            Track = Color.FromArgb(Dark ? 46 : 36, ink, ink, ink);
+            Grid = Color.FromArgb(Dark ? 30 : 24, ink, ink, ink);
+            Divider = Color.FromArgb(Dark ? 36 : 30, ink, ink, ink);
         }
 
         private static void Lighten()

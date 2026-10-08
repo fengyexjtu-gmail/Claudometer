@@ -77,7 +77,9 @@ namespace TokenMeter
             if (!s.HasData || s.BurnPct.Count == 0)
             {
                 g.SmoothingMode = SmoothingMode.Default;
-                string msg = s.LoggedIn ? L.S("chart.waiting") : L.S("chart.loginfirst");
+                string msg = !s.LoggedIn ? L.S("chart.loginfirst")
+                           : s.HasData && s.FiveResetUtc == DateTime.MinValue ? L.S("chart.idle")
+                           : L.S("chart.waiting");
                 SizeF mm = g.MeasureString(msg, font);
                 using (var b = new SolidBrush(Theme.Faint))
                     g.DrawString(msg, font, b, plot.X + (plot.Width - mm.Width) / 2f, plot.Y + plot.Height / 2f - mm.Height);
@@ -104,7 +106,8 @@ namespace TokenMeter
             using (var b = new SolidBrush(actual)) g.FillEllipse(b, tip.X - 3.5f * scale, tip.Y - 3.5f * scale, 7f * scale, 7f * scale);
 
             // 'now' divider at the latest sample
-            using (var p = new Pen(Theme.Divider, 1f * scale)) { p.DashStyle = DashStyle.Dash; g.DrawLine(p, tip.X, plot.Y, tip.X, plot.Bottom); }
+            // Axis grey, not the divider shade: the divider is near-white and vanishes on glass.
+            using (var p = new Pen(Theme.Axis, 1.2f * scale)) { p.DashStyle = DashStyle.Dash; g.DrawLine(p, tip.X, plot.Y, tip.X, plot.Bottom); }
             {
                 string lab = L.S("chart.now");
                 SizeF m = g.MeasureString(lab, font);

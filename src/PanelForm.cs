@@ -105,6 +105,7 @@ namespace TokenMeter
             if (!IsHandleCreated) return;
             _glassAsked = _cfg != null && _cfg.Glass;
             _glass = Glass.Apply(Handle, _glassAsked.Value, Theme.Dark);
+            Theme.SetGlass(_glass);
             Invalidate();
         }
 
@@ -470,10 +471,11 @@ namespace TokenMeter
             Snapshot s = _snap;
             Color txt = FiveText(s), fill = LevelFill(s.FivePct);
 
-            DateTime start = s.FiveResetUtc - Analytics.Window;
+            // No resets_at (no usage in the last five hours, so no window yet) arrives as MinValue;
+            // subtracting the window from that underflows, so only derive the start when it's real.
             string head = L.S("win5.title");
             if (s.FiveResetUtc > DateTime.MinValue)
-                head += "  " + Fmt.LocalTime(start) + " → " + Fmt.LocalTime(s.FiveResetUtc);
+                head += "  " + Fmt.LocalTime(s.FiveResetUtc - Analytics.Window) + " → " + Fmt.LocalTime(s.FiveResetUtc);
             Str(g, head, _f9b, Theme.Muted, Lx, y + S(12));
 
             string pct = P(s.FivePct);
@@ -485,8 +487,8 @@ namespace TokenMeter
             y += S(19);
 
             PaintPill(g, y);
-            string reset = s.FiveResetUtc > s.NowUtc
-                ? L.F("reset.in", Fmt.Duration(s.ToReset))
+            string reset = s.FiveResetUtc == DateTime.MinValue ? L.S("win5.idle")
+                : s.FiveResetUtc > s.NowUtc ? L.F("reset.in", Fmt.Duration(s.ToReset))
                 : L.S("reset.done");
             Str(g, reset, _f8, Theme.Muted, Lx, y + S(1));
             y += S(24);

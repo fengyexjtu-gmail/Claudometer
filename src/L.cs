@@ -76,6 +76,8 @@ namespace TokenMeter
 
             Add("win5.title", "5-hour window", "5 小时窗口", "Fenêtre de 5 h", "5-часовое окно", "5 時間ウィンドウ");
             Add("reset.in", "resets in {0}", "{0}后重置", "réinit. dans {0}", "сброс через {0}", "{0}後にリセット");
+            Add("win5.idle", "No window yet — it starts with your next message", "窗口未开始 · 下次使用时开始计时", "Pas encore de fenêtre — elle démarre au prochain message", "Окно ещё не началось — начнётся со следующего сообщения", "ウィンドウ未開始 · 次の利用で開始します");
+            Add("chart.idle", "No usage in the last 5 hours", "最近 5 小时没有用量", "Aucun usage ces 5 dernières heures", "Нет использования за последние 5 часов", "直近 5 時間の利用なし");
             Add("reset.done", "reset", "已重置", "réinitialisé", "сброшено", "リセット済み");
             Add("reset.at", "resets {0}", "重置 {0}", "réinit. {0}", "сброс {0}", "リセット {0}");
 
@@ -176,6 +178,8 @@ namespace TokenMeter
             Add("login.finish", "Finish sign-in", "完成登录", "Terminer", "Завершить вход", "ログイン完了");
             Add("login.finish.count", "Finish ({0})", "完成登录 ({0})", "Terminer ({0})", "Завершить ({0})", "ログイン完了 ({0})");
             Add("login.opened", "Browser opened. After signing in, the page shows a code — copy it and paste it in step 2.", "已打开浏览器。登录并同意后，页面会显示一段 code —— 复制它，粘贴到上面第 2 步。", "Navigateur ouvert. Après connexion, la page affiche un code — copiez-le dans l'étape 2.", "Браузер открыт. После входа страница покажет код — скопируйте его в шаг 2.", "ブラウザを開きました。ログイン後にページへ表示される code をコピーし、手順 2 に貼り付けてください。");
+            Add("login.opened.copied", "Browser opened, and the link is on your clipboard - if no sign-in page shows up, paste it into the address bar. After signing in, copy the code the page shows into step 2.", "已打开浏览器，登录链接也已复制到剪贴板——如果没看到登录页，把它粘贴到浏览器地址栏。登录并同意后，把页面显示的 code 粘贴到上面第 2 步。", "Navigateur ouvert et lien copié dans le presse-papiers — si la page de connexion n'apparaît pas, collez-le dans la barre d'adresse. Après connexion, collez le code affiché à l'étape 2.", "Браузер открыт, ссылка скопирована в буфер обмена — если страница входа не появилась, вставьте её в адресную строку. После входа вставьте показанный код в шаг 2.", "ブラウザを開き、リンクもクリップボードにコピーしました。ログインページが表示されない場合はアドレスバーに貼り付けてください。ログイン後、表示された code を手順 2 に貼り付けます。");
+            Add("login.openfail.copied", "Couldn't open a browser ({0}). The sign-in link is on your clipboard - paste it into your browser's address bar.", "无法打开浏览器（{0}）。登录链接已复制到剪贴板，请粘贴到浏览器地址栏。", "Impossible d'ouvrir le navigateur ({0}). Le lien est dans le presse-papiers — collez-le dans la barre d'adresse.", "Не удалось открыть браузер ({0}). Ссылка в буфере обмена — вставьте её в адресную строку.", "ブラウザを開けませんでした（{0}）。リンクをクリップボードにコピーしたので、アドレスバーに貼り付けてください。");
             Add("login.openfail", "Failed to open browser: {0}", "打开浏览器失败：{0}", "Échec de l'ouverture du navigateur : {0}", "Не удалось открыть браузер: {0}", "ブラウザを開けませんでした：{0}");
             Add("login.pastefirst", "Paste the code from the page first.", "请先粘贴页面给出的 code。", "Collez d'abord le code de la page.", "Сначала вставьте код со страницы.", "先にページの code を貼り付けてください。");
             Add("login.verifying", "Verifying and exchanging the token…", "正在校验并换取令牌…", "Vérification et échange du jeton…", "Проверка и обмен токена…", "トークンを検証・交換中…");
