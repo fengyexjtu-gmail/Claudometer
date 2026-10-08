@@ -1,6 +1,6 @@
 import AppKit
 
-enum App { static let version = "1.2.0" }
+enum App { static let version = "1.3.1" }
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var statusItem: NSStatusItem!
