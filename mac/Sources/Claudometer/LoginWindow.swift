@@ -23,6 +23,8 @@ final class LoginWindow: NSObject, NSWindowDelegate {
     private func build() {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 250),
                           styleMask: [.titled, .closable], backing: .buffered, defer: false)
+        // We own the window; AppKit's release-on-close would over-release it and crash on close.
+        window.isReleasedWhenClosed = false
         window.title = "Sign in to Claude"
         window.delegate = self
         let v = NSView(frame: window.contentView!.bounds)
